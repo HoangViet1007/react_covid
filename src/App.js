@@ -1,25 +1,63 @@
-import logo from './logo.svg';
-import './App.css';
+import { Container, Typography } from '@material-ui/core';
+import { useEffect, useState } from 'react';
+import { sortBy } from 'lodash';
+import { getCountries, getReportByCountry } from './apis';
+import CountrySelector from './components/CountrySelector';
+import Highlight from './components/Highlight';
+import Summary from './components/Summary';
+import moment from 'moment';
+import 'moment/locale/vi';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [countries,setCountries] = useState([]);
+    const [selectedCountryId,setselectedCountryId] = useState('');
+    const [report, setReport] = useState([]);
+
+    useEffect(() => {
+        getCountries()
+                .then((res) => {
+                    const countrySort = sortBy(res.data, 'Country')
+                    setCountries(countrySort);
+                    setselectedCountryId('vn');
+                });
+    },[]);
+
+    const handleOnChange = (e) => {
+        setselectedCountryId(e.target.value);
+    };
+
+    useEffect(() => {
+        if(selectedCountryId){
+            const { Slug } = countries.find(country => country.ISO2.toLowerCase() === selectedCountryId)
+
+            getReportByCountry(Slug)
+                .then(res => {
+                    res.data.pop();
+                    setReport(res.data)
+                });    
+        }
+    },[countries, selectedCountryId]);
+    
+    return (
+        <>
+           <Container>
+                <Typography variant='h2' component='h2'>
+                    Số liệu COVID-19
+                </Typography>
+                <Typography>{moment().format('LLLL')}</Typography>
+                <CountrySelector
+                    countries={countries}
+                    handleOnChange={handleOnChange} 
+                    value={selectedCountryId} 
+                />
+                <Highlight 
+                    report={report} 
+                />
+                <Summary selectedCountryId={selectedCountryId} report={report} />
+           </Container>
+        </> 
+    );
+
 }
 
 export default App;
