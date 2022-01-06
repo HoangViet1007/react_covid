@@ -1,5 +1,5 @@
 import { Container, Typography } from '@material-ui/core';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { sortBy } from 'lodash';
 import { getCountries, getReportByCountry } from './apis';
 import CountrySelector from './components/CountrySelector';
@@ -10,7 +10,7 @@ import 'moment/locale/vi';
 
 function App() {
     const [countries,setCountries] = useState([]);
-    const [selectedCountryId,setselectedCountryId] = useState('');
+    const [selectedCountryId,setSelectedCountryId] = useState('');
     const [report, setReport] = useState([]);
 
     useEffect(() => {
@@ -18,13 +18,13 @@ function App() {
                 .then((res) => {
                     const countrySort = sortBy(res.data, 'Country')
                     setCountries(countrySort);
-                    setselectedCountryId('vn');
+                    setSelectedCountryId('vn');
                 });
     },[]);
 
-    const handleOnChange = (e) => {
-        setselectedCountryId(e.target.value);
-    };
+    const handleOnChange = useCallback((e) => {
+        setSelectedCountryId(e.target.value);
+    },[]);
 
     useEffect(() => {
         if(selectedCountryId){
@@ -32,7 +32,7 @@ function App() {
 
             getReportByCountry(Slug)
                 .then(res => {
-                    res.data.pop();
+                    // res.data.pop();
                     setReport(res.data)
                 });    
         }

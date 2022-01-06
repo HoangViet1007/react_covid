@@ -10,7 +10,11 @@ function Summary ({report, selectedCountryId}) {
 
     useEffect(() => {
         if (selectedCountryId) {
-            console.log(selectedCountryId);
+            getMapDataByCountryId(selectedCountryId)
+                .then((res) => {
+                    setMapData(res);
+                })
+                .catch((err) => console.log({ err }));
           }
     },[selectedCountryId])
 
